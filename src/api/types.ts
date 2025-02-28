@@ -14,6 +14,8 @@ export type DefaultReportingPeriod = Prisma.ReportingPeriodGetPayload<
   typeof reportingPeriodArgs
 >
 
+export type PromptBody = z.infer<typeof schemas.promptSchema>
+
 export type PostGoalBody = z.infer<typeof schemas.postGoalSchema>
 export type PostGoalsBody = z.infer<typeof schemas.postGoalsSchema>
 

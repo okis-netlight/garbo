@@ -27,6 +27,7 @@ import { errorHandler } from './api/plugins/errorhandler'
 import { municipalityReadRoutes } from './api/routes/municipality.read'
 import { companyBaseYearRoutes } from './api/routes/company.baseYear'
 import { wikiUpdateRoutes } from './api/routes/wiki.update'
+import { chatRoutes } from './api/routes/chat'
 
 async function startApp() {
   const app = Fastify({
@@ -125,6 +126,8 @@ async function authenticatedContext(app: FastifyInstance) {
   app.register(companyDeleteRoutes, { prefix: 'api/companies' })
 
   app.register(wikiUpdateRoutes, { prefix: 'api/wikidata' })
+
+  app.register(chatRoutes, { prefix: 'api/chat' })
 }
 
 export default startApp

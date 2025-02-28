@@ -36,6 +36,9 @@ const openAPITagDefinitions = {
   Wikidata: {
     description: 'Routes for pushing data from the database to the Wikidata API',
   },
+  Chat: {
+    description: 'Routes for querying the Garbo LLM',
+  },
 } as const
 
 type TagName = keyof typeof openAPITagDefinitions

@@ -1,6 +1,10 @@
 import { z } from 'zod'
 import { emissionUnitSchemaWithDefault, wikidataIdSchema } from './common'
 
+export const promptSchema = z.object({
+  prompt: z.string()
+})
+
 const createMetadataSchema = z.object({
   metadata: z
     .object({
