@@ -5,8 +5,8 @@ import { Claim } from '../src/lib/wikidata';
 import { exit } from 'process';
 
 //Currently still in testing the filters filter out only data related to ABB as this company is present in the Sandbox
-const entityDownloadId: `Q${number}` = "Q1467848";
-const entityUploadId: `Q${number}` = "Q1467848";
+const entityDownloadId: `Q${number}` = "Q731938";
+const entityUploadId: `Q${number}` = "Q238688";
 
 const prisma = new PrismaClient()
 
@@ -169,7 +169,7 @@ const emissionsScope3 = await prisma.scope3Category.findMany({
     },
     where: {
         metadata: {some: {verifiedByUserId: {not: null}}},
-        scope3: {emissions: {reportingPeriod: {year: "2023"}}}
+        scope3: {emissions: {reportingPeriod: {year: "2022"}}}
     }
 })
 

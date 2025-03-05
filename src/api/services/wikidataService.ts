@@ -46,25 +46,15 @@ class WikidataService {
               return {guid: claim.id, referenceHash: claim.references[0].hash};
             } else {
               return {guid: claim.id};
-            }
-  
-            
+            }            
         }
     } 
   
     return undefined;
   }
 
-  compareClaims(newClaim, wikiDataClaim) { 
-    const qualifiers = wikiDataClaim.qualifiers;
-    if(qualifiers[START_TIME] === undefined || qualifiers[START_TIME][0].datavalue.value.time !== this.transformToWikidataDateString(new Date(newClaim.startDate))) {
-      return false;
-    }
-
-    if(qualifiers[END_TIME] === undefined || qualifiers[END_TIME][0].datavalue.value.time !== this.transformToWikidataDateString(new Date(newClaim.endDate))) {
-        return false;
-    }
-    
+  compareClaims(newClaim, wikidataClaim) { 
+    const qualifiers = wikidataClaim.qualifiers; 
     if( (newClaim.scope === undefined && qualifiers[OBJECT_OF_STATEMENT_HAS_ROLE] !== undefined) ||
         (newClaim.scope !== undefined && (qualifiers[OBJECT_OF_STATEMENT_HAS_ROLE] === undefined || qualifiers[OBJECT_OF_STATEMENT_HAS_ROLE][0].datavalue.value.id !== newClaim.scope))) {
         return false;
@@ -75,7 +65,12 @@ class WikidataService {
     }
     return true;
   }
-
+  /**
+   * Calculates the claims to add and which to remove in order to update the entity
+   * @param entity Entity for which the exisiting and adding Claims should be compared
+   * @param claims The claims to add
+   * @returns 
+   */
   async diffCarbonFootprintClaims(entity: ItemId, claims: Claim[]) {
     const {entities} = await getClaims(entity);
     const newClaims: Claim[] = [];
@@ -86,20 +81,43 @@ class WikidataService {
     for(const claim of claims) {
       let duplicate = false;
       for(const existingClaim of existingClaims) {
+        /**
+         * Bit of explanaiton for the different cases
+         * The compareClaim function looks if there is already a claim with the same scope and optional category
+         * If that is the case we only want the most recent claim of that scope and category to be on wikidata
+         * Therefore, we look at the end date of the claim's reporting period to find the most recent one
+         * All older claims will not be added or are removed if there are on wikidata 
+         */
         if(this.compareClaims(claim, existingClaim)) {
-          if(("+" + claim.value) !== existingClaim.mainsnak.datavalue.value.amount) {
-            newClaims.push(claim);
+          if(existingClaim.qualifiers[END_TIME] === undefined 
+            || this.transformFromWikidataDateString(existingClaim.qualifiers[END_TIME][0].datavalue.value.time).getTime() < (new Date(claim.endDate)).getTime()) {
+              rmClaims.push({id: existingClaim.id, remove: true}); //Remove older claims;
+              continue;
+          } else if(existingClaim.qualifiers[END_TIME] !== undefined 
+            && this.transformFromWikidataDateString(existingClaim.qualifiers[END_TIME][0].datavalue.value.time).getTime() > (new Date(claim.endDate)).getTime()) {
+              duplicate = true; //If there is a more recent one do not add that claim
+          } else if(existingClaim.qualifiers[END_TIME] !== undefined && existingClaim.qualifiers[START_TIME] !== undefined 
+            && this.transformFromWikidataDateString(existingClaim.qualifiers[END_TIME][0].datavalue.value.time).getTime() === (new Date(claim.endDate)).getTime()
+            && this.transformFromWikidataDateString(existingClaim.qualifiers[START_TIME][0].datavalue.value.time).getTime() === (new Date(claim.startDate)).getTime()) {
+            if(("+" + claim.value) !== existingClaim.mainsnak.datavalue.value.amount) {
+              newClaims.push(claim); //Update value by removing old claim and adding new claim
+              rmClaims.push({id: existingClaim.id, remove: true});
+            }          
+            duplicate = true;
+          } else {
+            newClaims.push(claim); //if for some reason the start times differ we still opt for our claim
             rmClaims.push({id: existingClaim.id, remove: true});
+            duplicate = true;
           }          
-          duplicate = true;
-          break;
         }      
       }
       if(!duplicate) {
-        newClaims.push(claim);
+        newClaims.push(claim); //only add claims that not exist already
       }
     }
 
+    console.log(rmClaims);
+    console.log(newClaims);
     return {newClaims, rmClaims};
   }
 
@@ -129,6 +147,10 @@ class WikidataService {
   
   transformToWikidataDateString(date: Date) {
     return "+" + date.toISOString().substring(0, 19) + "Z";
+  }
+
+  transformFromWikidataDateString(date: string) {
+    return new Date(date.substring(1));
   }
 }
 
