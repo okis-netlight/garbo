@@ -2,19 +2,20 @@ import 'dotenv/config'
 import { number, z } from 'zod'
 
 const envSchema = z.object({
-    WIKIDATA_URL: z.string().default('https://www.wikidata.org'),
+    WIKIDATA_URL: z.string().default('https://www.wikidata.org')
 })
 
 const env = envSchema.parse(process.env)
 
 interface WikidataProperties {
-    CARBON_FOOTPRINT: string,
-    START_TIME: string,
-    END_TIME: string,
-    DETERMINATION_METHOD_OR_STANDARD: string,
-    REFERENCE_URL: string,
-    OBJECT_OF_STATEMENT_HAS_ROLE: string,
-    APPLIES_TO_PART: string
+    CARBON_FOOTPRINT: `P${number}`,
+    START_TIME: `P${number}`,
+    END_TIME: `P${number}`,
+    DETERMINATION_METHOD_OR_STANDARD: `P${number}`,
+    REFERENCE_URL: `P${number}`,
+    OBJECT_OF_STATEMENT_HAS_ROLE: `P${number}`,
+    APPLIES_TO_PART: `P${number}`,
+    STATED_IN: `P${number}`
 }
 
 interface WikidataEntities {
@@ -49,7 +50,8 @@ export const LiveWikidataProperties: WikidataProperties = {
     DETERMINATION_METHOD_OR_STANDARD: "P459",
     REFERENCE_URL: "P854",
     OBJECT_OF_STATEMENT_HAS_ROLE: "P3831",
-    APPLIES_TO_PART: "P518"
+    APPLIES_TO_PART: "P518",
+    STATED_IN: "P248"
 } as const
 
 export const TestWikidataProperties: WikidataProperties = {
@@ -59,7 +61,8 @@ export const TestWikidataProperties: WikidataProperties = {
     DETERMINATION_METHOD_OR_STANDARD: "P98847",
     REFERENCE_URL: "P93",
     OBJECT_OF_STATEMENT_HAS_ROLE: "P98849",
-    APPLIES_TO_PART: "P822"
+    APPLIES_TO_PART: "P822",
+    STATED_IN: "P149"
 } as const
 
 export const LiveWikidataEntities : WikidataEntities = {

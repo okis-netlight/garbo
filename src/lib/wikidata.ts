@@ -175,8 +175,6 @@ export async function editClaim(entity: ItemId, claims: Claim[], removeClaim: Re
 
     return claimObject;
   }) 
-
-  const matchingQualifiers = [ START_TIME, END_TIME, DETERMINATION_METHOD_OR_STANDARD, OBJECT_OF_STATEMENT_HAS_ROLE ];
   
   const body = {
     id: entity,
@@ -191,6 +189,8 @@ export async function editClaim(entity: ItemId, claims: Claim[], removeClaim: Re
 
   await wbEdit.entity.edit(body);
 }
+
+export async function createEntity(companyId: `P${number}`, companyName: string, reportingPeriodYear: string, url: string, backupUrl?: string)
 
 export async function getWikipediaTitle(id: EntityId): Promise<string> {
   const url = wbk.getEntities({
